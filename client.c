@@ -10,7 +10,6 @@
 
 struct my_msgbuf{
     long mtype;
-    long client_id;
     char mtext[200];
 };
 
@@ -34,10 +33,15 @@ int main(int argc, char* argv[]){
     }
 
     // asking the user to enter client ID
-    int client_id = 0;
-    printf("Enter the Client-ID\n");
-    scanf("%d",&client_id);
-
+    int client_id = -1;
+    while(client_id <= 0){
+        printf("Enter the Client-ID\n");
+        scanf("%d",&client_id);
+        if(client_id <= 0){
+            printf("Please enter a positive integer as client ID\n");
+        }
+    }
+   
     // display the menu to user
     while(1){
         int input_option = 0;
@@ -52,12 +56,12 @@ int main(int argc, char* argv[]){
             buf.mtype = input_option + 1000*client_id; 
             strcpy(buf.mtext,"Hi");
 
-             // send "Hi" throught message queue to server.c file
+             // send "Hi" through message queue to server.c file
             if(msgsnd(msqid,&buf,sizeof(buf.mtext),0) == -1){
                 perror("msgsnd");
             }
 
-            // receiving the output throught msgrcv from message queue
+            // receiving the output through msgrcv from message queue
             if(msgrcv(msqid,&output,sizeof(output.mtext),(input_option+4)+1000*client_id,0) == -1){
                 perror("msgrcv");
                 exit(1);
@@ -68,17 +72,9 @@ int main(int argc, char* argv[]){
             // taking filename from the user
             char filename[1000];
             fflush(stdin);
+
             printf("Enter the file name to be searched\n");
-
-            int index = 0;
-            char ch = getchar();
-
-            while (ch != '\n'){
-                filename[index] = ch;
-                index++;
-                ch = getchar();
-            }
-            filename[index] = '\0';
+            scanf("%[^\n]s",filename);
             fflush(stdin);
 
             // hashing the mtype using both menu option as well as client_id
@@ -97,25 +93,15 @@ int main(int argc, char* argv[]){
             }
 
             // printing the output message
-            fflush(stdin);
             printf("%s\n",output.mtext);
-            fflush(stdin);
 
         }else if(input_option == 3){
             // taking filename from the user
             char filename[1000];
             fflush(stdin);
+
             printf("Enter the file name to get the word count, if the file exists !\n");
-
-            int index = 0;
-            char ch = getchar();
-
-            while (ch != '\n'){
-                filename[index] = ch;
-                index++;
-                ch = getchar();
-            }
-            filename[index] = '\0';
+            scanf("%[^\n]s",filename);
             fflush(stdin);
 
             // hashing the mtype using both menu option as well as client_id
@@ -137,11 +123,11 @@ int main(int argc, char* argv[]){
             printf("%s\n\n",output.mtext);
         }
         else if(input_option == 4){
-            // if 4 is entered as input, terminate the main server
+            // if 4 is entered as input client will terminate
 
             // hashing the mtype using both menu option as well as client_id
             buf.mtype = input_option + 1000*client_id; 
-            strcpy(buf.mtext,"Terminate the main server");
+            strcpy(buf.mtext,"Terminate the Client");
 
             // sending the message through message queue to server.c file
             if(msgsnd(msqid,&buf,sizeof(buf.mtext),0) == -1){
@@ -149,13 +135,13 @@ int main(int argc, char* argv[]){
             }
 
             // exiting
-            printf("\nSuccessfully terminated the process\n\n");
+            printf("\nSuccessfully terminated the client process\n\n");
             exit(1);
 
         }else{
             printf("Please Enter a Valid Option\n");
         }
-    }
 
+    }
     return 0;
 }

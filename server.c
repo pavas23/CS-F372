@@ -6,13 +6,11 @@
 #include<sys/ipc.h>
 #include<sys/msg.h>
 #include<errno.h>
-#include<semaphore.h>
 
 #define PERMS 0644
 
 struct my_msgbuf{
     long mtype;
-    long client_id;
     char mtext[200];
 };
 
@@ -56,9 +54,6 @@ void handle_response_type2(int msqid,int request_type,int client_id,struct my_ms
         exit(1);
     }
 
-    // setting a status variable if the exec fails, so that first child process does not have to wait
-    int status = 0;
-
     // forking the second child process
     pid_t second_child_pid = fork();
 
@@ -76,18 +71,15 @@ void handle_response_type2(int msqid,int request_type,int client_id,struct my_ms
 
         // executing the execlp command
         if(execlp("ls","ls",NULL) == -1){
-            status = 1; // if exec fails
+            char error_message[] = "Error_in_execlp_function!!_Can't_give_the_word_count ";
+            write(pfds[1],error_message,sizeof(error_message));
             perror("Error in execlp");
             exit(1);
         }
 
     }else{
         // first child process for searching the file in the output given by ls command
-
-        // if exec in the second child process fails then terminate this child process as nothing to read
-        if(status == 1){
-            exit(0);
-        }
+        wait(NULL); // will wait for child process
 
         close(pfds[1]);  // close the writing end of the pipe
 
@@ -147,9 +139,6 @@ void handle_response_type3(int msqid,int request_type,int client_id,struct my_ms
         exit(1);
     }
 
-    // setting a status variable if the exec fails, so that first child process does not have to wait
-    int status = 0;
-
     // forking the second child process
     pid_t second_child_pid = fork();
 
@@ -167,18 +156,16 @@ void handle_response_type3(int msqid,int request_type,int client_id,struct my_ms
 
         // executing the execlp command
         if(execlp("wc","wc","-w",filename,NULL) == -1){
-            status = 1; // if exec fails
+            // if execlp doesn't work then write the error message in the writing end of the pipe
+            char error_message[] = "Error_in_execlp_function!!_Can't_give_the_word_count ";
+            write(pfds[1],error_message,sizeof(error_message));
             perror("Error in execlp");
             exit(1);
         }
 
     }else{
         // first child process for searching the file in the output given by ls command
-
-        // if exec in the second child process fails then terminate this child process as nothing to read
-        if(status == 1){
-            exit(0);
-        }
+        wait(NULL); // will wait for child process
 
         close(pfds[1]);  // close the writing end of the pipe
 
@@ -213,6 +200,24 @@ void handle_response_type3(int msqid,int request_type,int client_id,struct my_ms
     return;
 }
 
+void handle_request_terminate(int msqid,struct my_msgbuf buf,int numChildProcesses){
+
+    // it will wait for all child processes to finish, before exiting
+    for(int i=0;i<numChildProcesses;i++){
+        wait(NULL);
+    }
+
+    printf("Main Server Exiting...\n\n");
+
+    // this will delete the message queue
+    if(msgctl(msqid,IPC_RMID,NULL) == -1){
+        perror("msgctl");
+        exit(1);
+    }
+
+    return;
+}
+
 int main(int argc, char* argv[]){
 
     // making the buffer
@@ -235,18 +240,17 @@ int main(int argc, char* argv[]){
     }
 
     printf("Main Server Running...\n");
+    int numChildProcesses = 0;
 
     // main server will loop forever, and serve the requests given by the clients
     while(1){
-        // if at any time queue is empty put a check
-
-
-
         // reading messages from the message queue
         if(msgrcv(msqid,&buf,sizeof(buf.mtext),0,0) == -1){
             perror("msgrcv");
             exit(1);
         }
+
+        numChildProcesses++; // increment the child Process everytime a child is created
 
         // Fork a child process, to create a child server which will serve all the client requests
         pid_t child_pid = fork();
@@ -257,10 +261,17 @@ int main(int argc, char* argv[]){
         }
 
         if(child_pid == 0){
-            // Inside the Child Server
-
+            // Inside the Child Server, which will serve every client request
             int client_id = buf.mtype/1000;
             int request_type = buf.mtype%10;
+
+            // if the server tries to read a request that is already processed, that will have request_type > 4
+            if(request_type > 4){
+                if(msgsnd(msqid,&buf,sizeof(buf.mtext),0) == -1){
+                    perror("msgsnd");
+                }
+                sleep(1); // sleep for 1s, so that client can read the result from the queue for synchronization purpose
+            }
 
             if(request_type == 1){
                 // Ping Server
@@ -275,23 +286,18 @@ int main(int argc, char* argv[]){
                 handle_response_type3(msqid,request_type,client_id,buf);
             }
             else if(request_type == 4){
-                // if client wishes to exit, cleanup the message queue
-                printf("Server: Exiting...\n");
-
-                // deleting the message queue
-                if(msgctl(msqid,IPC_RMID,NULL) == -1){
-                    perror("msgctl");
-                    exit(1);
-                }
-
-                execlp("^D","^D");
+                // Message that client process has been terminated
+                printf("Server: Client Process with ID: %d terminated\n",client_id);
             }
-
             exit(0); // terminate the child process, after performing the action
         }
         else{
             // parent process
-            waitpid(child_pid,&s,0); // wait for child process to finish
+            if(buf.mtype/1000 == 0){
+                // this means this is termination request, sent by cleanup process as its mtype was < 1000
+                handle_request_terminate(msqid,buf,numChildProcesses);
+                exit(1); // to terminate the server
+            }
         }
     }
 
