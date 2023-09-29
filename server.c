@@ -71,7 +71,7 @@ void handle_response_type2(int msqid,int request_type,int client_id,struct my_ms
 
         // executing the execlp command
         if(execlp("ls","ls",NULL) == -1){
-            char error_message[] = "Error_in_execlp_function!!_Can't_give_the_word_count ";
+            char error_message[] = "Error_in_execlp_function!!_Can't_give_the_files_list ";
             write(pfds[1],error_message,sizeof(error_message));
             perror("Error in execlp");
             exit(1);
@@ -118,6 +118,7 @@ void handle_response_type2(int msqid,int request_type,int client_id,struct my_ms
     return;
 }
 
+// function for handling request of type 3
 void handle_response_type3(int msqid,int request_type,int client_id,struct my_msgbuf buf){
     printf("Sever: Request sent to File Word Count Server, from client with ID: %d\n",client_id);
 
@@ -220,9 +221,8 @@ void handle_request_terminate(int msqid,struct my_msgbuf buf,int numChildProcess
 
 int main(int argc, char* argv[]){
 
-    // making the buffer
-    struct my_msgbuf buf;
-    int msqid; // message queue id, id for the message queue we created in server
+    struct my_msgbuf buf; // making the buffer object
+    int msqid; // message queue id, id for the message queue we will create in the server
     int len;
     int s; // status variable for wait
     key_t key;
@@ -240,7 +240,7 @@ int main(int argc, char* argv[]){
     }
 
     printf("Main Server Running...\n");
-    int numChildProcesses = 0;
+    int numChildProcesses = 0; // to keep track of number of child processes created
 
     // main server will loop forever, and serve the requests given by the clients
     while(1){
@@ -250,7 +250,7 @@ int main(int argc, char* argv[]){
             exit(1);
         }
 
-        numChildProcesses++; // increment the child Process everytime a child is created
+        numChildProcesses++; // increment the number of child Process everytime a child is created
 
         // Fork a child process, to create a child server which will serve all the client requests
         pid_t child_pid = fork();

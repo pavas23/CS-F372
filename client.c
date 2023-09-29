@@ -14,8 +14,8 @@ struct my_msgbuf{
 };
 
 int main(int argc, char* argv[]){
-    struct my_msgbuf buf;
-    struct my_msgbuf output;
+    struct my_msgbuf buf; // buf obj for sending the message to server
+    struct my_msgbuf output; // buf obj for receiving the message from message queue
     int msqid; // message queue id, id for the message queue we created in server
     int len;
     key_t key;
@@ -34,6 +34,7 @@ int main(int argc, char* argv[]){
 
     // asking the user to enter client ID
     int client_id = -1;
+    // make sure ID entered by client is a positive number
     while(client_id <= 0){
         printf("Enter the Client-ID\n");
         scanf("%d",&client_id);
@@ -56,7 +57,7 @@ int main(int argc, char* argv[]){
             buf.mtype = input_option + 1000*client_id; 
             strcpy(buf.mtext,"Hi");
 
-             // send "Hi" through message queue to server.c file
+            // send "Hi" through message queue to server.c file
             if(msgsnd(msqid,&buf,sizeof(buf.mtext),0) == -1){
                 perror("msgsnd");
             }
@@ -141,7 +142,7 @@ int main(int argc, char* argv[]){
         }else{
             printf("Please Enter a Valid Option\n");
         }
-
+        
     }
     return 0;
 }
