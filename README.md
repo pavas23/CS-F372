@@ -100,3 +100,10 @@ on the terminate information to the main server, the cleanup process will
 terminate. When the main server receives the terminate information from the
 cleanup process, the main server ``deletes the message queue, performs other
 cleanup tasks`` (if required) and ``terminates``.
+
+## Authors
+- [Pavas Garg](https://www.github.com/pavas23)
+- [Atharva Vinod Dashora](https://github.com/goldengod-1)
+- [Murari Karthik](https://github.com/Murari-Karthik)
+- [Tushar Raghani](https://github.com/Tushar-015)
+- [Rohan Pothireddy](https://github.com/rohanpothireddy)
