@@ -75,6 +75,7 @@ int main(int argc, char* argv[]){
             fflush(stdin);
 
             printf("Enter the file name to be searched\n");
+            getchar();
             scanf("%[^\n]s",filename);
             fflush(stdin);
 
@@ -102,6 +103,7 @@ int main(int argc, char* argv[]){
             fflush(stdin);
 
             printf("Enter the file name to get the word count, if the file exists !\n");
+            getchar();
             scanf("%[^\n]s",filename);
             fflush(stdin);
 

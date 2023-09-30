@@ -32,14 +32,22 @@ int main(int argc,char* argv[]){
         perror("msgget");
         exit(1);
     }
-
+    
+    int count = 0;
     // displaying the menu option to the user for cleanup
     while(1){
         printf("Do you want the server to terminate? Press Y for Yes and N for No\n");
-        char ch;
-        scanf("%c",&ch);
+        char ch[100];
+        
+        if(count!=0)
+        {
+        getchar();	
+        }
+        count++;
+        
+        scanf("%[^\n]s",ch);
 
-        if(ch == 'Y'){
+        if(strcmp(ch,"Y")==0){
             // terminate the main server
             buf.mtype = 999; // as all other requests sent to the main server will be > 1000
             strcpy(buf.mtext,"Terminate the Main Server!!");
@@ -52,7 +60,7 @@ int main(int argc,char* argv[]){
             // after terminating the main server, this process will also terminate
             exit(1);
         }
-        else if(ch == 'N'){
+        else if(strcmp(ch,"N")==0){
             continue;
         }
         else{
