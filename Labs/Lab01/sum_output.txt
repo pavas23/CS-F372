@@ -1,0 +1,6 @@
+12
+./sum.sh: line 6: 5+7: command not found
+
+5+7
+12
+a+b
