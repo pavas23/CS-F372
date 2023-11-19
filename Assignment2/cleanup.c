@@ -56,8 +56,7 @@ int main(int argc, char *argv[]){
             buf.sequence_number = 5;
             strcpy(buf.graph_file_name, "Cleanup");
 
-            if (msgsnd(msqid, &buf, sizeof(buf), 0) == -1)
-            {
+            if (msgsnd(msqid, &buf, sizeof(buf), 0) == -1){
                 perror("Error in msgsnd");
             }
 
