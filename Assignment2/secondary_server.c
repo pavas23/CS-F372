@@ -293,7 +293,7 @@ void *start_routine_dfs(void *arg){
             int num_node_of_graph = 0;
             char line[100];
             if (fgets(line, sizeof(line), file) != NULL){
-                num_node_of_graph = (line[0] - '0') * 10 + (line[1] - '0');
+                num_node_of_graph = atoi(line);
             }
 
             int adjacency_matrix[ROWS + 1][COLS + 1];
@@ -528,7 +528,7 @@ void *start_routine_bfs(void *arg){
             int num_node_of_graph = 0;
             char line[100];
             if (fgets(line, sizeof(line), file) != NULL){
-                num_node_of_graph = (line[0] - '0') * 10 + (line[1] - '0');
+                num_node_of_graph = atoi(line);
             }
 
             int adjacency_matrix[ROWS + 1][COLS + 1];

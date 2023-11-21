@@ -164,6 +164,7 @@ int main(int argc, char *argv[]){
             printf("\n\n%s\n\n", output.graph_file_name);
         }
         else{
+            printf("\n\n");
             char *token = strtok(output.graph_file_name, " "); // this will extract the first token
             while (token != NULL){ // loop through string to extract all other tokens also
                 printf("%s ", token);
