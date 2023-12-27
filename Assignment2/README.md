@@ -177,4 +177,45 @@ performing DFS or BFS.
 memory segment and only this thread should send the output back to the client via the single
 message queue. These should not be done by the server process.
 
+## ```CLEANUP PROCESS```
 
+- The cleanup process keeps running along with the clients, the load balancer and
+the servers.
+
+- The cleanup process keeps displaying a menu as:
+  - Want to terminate the application? Press Y (Yes) or N (No)
+    
+- If N is given as input, the process keeps running as usual and will not communicate with any
+other process. If Y is given as input, the process will inform the load balancer via the single
+message queue that the load balancer needs to terminate.
+
+- After passing on the termination information to the load balancer, the cleanup process will
+terminate.
+
+- When the load balancer receives the termination information from the cleanup process, the
+load balancer informs all the three servers to terminate via the single message queue, sleeps
+for 5 seconds, deletes the message queue and terminates. If you can think of any other cleanup
+activity required for the correct execution of the application, you can do that.
+
+- On receiving the termination information, the servers perform the relevant cleanup activities
+and terminate.
+
+- Note that the cleanup process will not force the load balancer to terminate while there are
+pending client requests. Moreover, the load balancer will not force the servers to terminate in
+the midst of servicing any client request or while there are pending client requests.
+
+## ```HANDLING CONCURRENT CLIENT REQUESTS```
+
+- Multiple read operations can be performed on the same
+graph file simultaneously. However, you need to be careful about simultaneous write operations as
+well as simultaneous read and write operations on the same graph file. Such conflicting operations
+have to be performed serially. You have to ensure this by using either semaphore or mutex. You need
+to use some locking mechanism on the graph files. You are free to use any synchronization construct
+between semaphore or mutex.
+
+## Authors
+- [Pavas Garg](https://www.github.com/pavas23)
+- [Atharva Vinod Dashora](https://github.com/goldengod-1)
+- [Murari Karthik](https://github.com/Murari-Karthik)
+- [Tushar Raghani](https://github.com/Tushar-015)
+- [Rohan Pothireddy](https://github.com/rohanpothireddy)
