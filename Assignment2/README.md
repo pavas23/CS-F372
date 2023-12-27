@@ -1,5 +1,5 @@
 # Operating Systems
-3-1, Operating Systems Assignment, We have to simulate an application for a distributed graph database system involving a load
+3-1, Operating Systems Assignment, We have to simulate an application for a ```distributed graph database system``` involving a load
 balancer process, a primary server process, two secondary server processes (secondary server 1 and secondary
 server 2), a cleanup process and several clients.
 
@@ -9,10 +9,10 @@ server 2), a cleanup process and several clients.
 
 - Load balancer forwards the write requests to the primary server.
 
-- Load balancer forwards the odd numbered read requests to secondary server 1 and the even
-numbered read requests to secondary server 2. Request numbering starts from 1.
+- Load balancer forwards the ```odd numbered read requests``` to ```secondary server 1``` and the ```even
+numbered read requests``` to ```secondary server 2```. Request numbering starts from 1.
 
-- On receiving a request from the load balancer, the server (primary or secondary) creates a new thread
+- On receiving a request from the load balancer, the server (primary or secondary) creates a ```new thread```
 to process the request. Once the processing is complete, this thread (not the server process) sends a
 message or an output back to the client.
 
@@ -29,7 +29,7 @@ load balancer, the servers perform the relevant cleanup activities and terminate
 
 ## ```GRAPH DATABASE```
 
-- The database system can contain both cyclic and acyclic graphs. The graphs are
+- The database system can contain both ```cyclic and acyclic``` graphs. The graphs are
 unweighted and undirected in nature and may contain self loops. Each graph is represented as a text
 (ASCII) file. The naming convention of each file is Gx.txt where x is number (like G1.txt or
 G2.txt).
@@ -47,7 +47,7 @@ G2.txt).
 <img width="482" alt="OS_Graph" src="https://github.com/pavas23/CS-F372/assets/97559428/fb510acc-3cdb-482c-a6eb-0fad1e24ff48">
 </div>
 
-- You can assume that the graph database system contains a maximum of 20 files. The database allows
+- You can assume that the graph database system contains a ```maximum of 20 files```. The database allows
 the clients to perform various read and write operations on the graphs. The write operations are
 facilitated by the primary server process and the read operations are performed by the secondary
 server processes, secondary server 1 and secondary server 2.
@@ -55,7 +55,7 @@ server processes, secondary server 1 and secondary server 2.
 ## ```CLIENT PROCESS```
 - The clients send the requests to a load balancer process via a single message queue
 (message queue to be created by the load balancer only). Note that the clients do not send the requests 
-to the servers directly. You are not allowed to use more than one message queue in the entire
+to the servers directly. You are not allowed to use more than ```one message queue``` in the entire
 assignment implementation.
 
 - Each client displays the following menu options.
@@ -67,7 +67,7 @@ assignment implementation.
 - Options 1 and 2 are write operations (to be performed by the primary server) and options 3 and 4 are
 read operations (to be performed by the secondary servers). For option 2, addition and/or deletion of
 nodes and/or edges can be requested by the client. Each client uses the following 3-tuple format for
-sending the request to the load balancer via the message queue: <Sequence_Number Operation_Number Graph_File_Name>.
+sending the request to the load balancer via the message queue: ```<Sequence_Number Operation_Number Graph_File_Name>```.
 
 - Sequence_Number will start from 1 and will keep on increasing monotonically till 100 for all the client requests sent across all the servers. This
 Sequence_Number corresponds to the request number mentioned earlier. It is guaranteed that the
@@ -92,9 +92,9 @@ the following prompt:
   - Enter adjacency matrix, each row on a separate line and elements of a single row separated by whitespace characters
 
 - For a read operation, the client specifies the starting vertex for the BFS/DFS traversal. The client writes
-this information in a shared memory segment. The client prompts the user to specify this starting
+this information in a ```shared memory segment```. The client prompts the user to specify this starting
 vertex by displaying the following message: Enter starting vertex. Each client can create a
-separate shared memory segment for every new request. Note that only the client should create the 
+```separate shared memory segment for every new request```. Note that only the client should create the 
 shared memory segment.
 
 - For every request, the client receives some sort of message or output from the server (actually it will
@@ -121,7 +121,7 @@ adjacency matrix) written by the client, opens the corresponding graph file (a n
 option 1 and an existing one for option 2), adds/updates the contents to/of the file and closes
 it.
 
-- After closing the file, the thread sends the message File successfully added for
+- After closing the file, the ```thread sends the message``` File successfully added for
 option 1 or File successfully modified for option 2 back to the client through the
 single message queue. The thread exits after this.
 
@@ -137,14 +137,14 @@ process itself.
   
 - Each secondary server spawns a new thread to handle a client request.
   
-- Each BFS or DFS traversal needs to be implemented using multithreading and you can assume
+- Each BFS or DFS traversal needs to be implemented using ```multithreading``` and you can assume
 that for these operations, the clients will choose only acyclic graphs.
 
 - The client will have specified a starting vertex for either type of traversals via a shared memory
 segment. The secondary server thread will read this vertex from the shared memory segment.
 
-- While processing a client request for DFS, the secondary server thread creates a new thread
-for every unvisited node. At the same time, you should ensure the depth-wise traversal of the
+- While processing a client request for DFS, the ```secondary server thread creates a new thread
+for every unvisited node```. At the same time, you should ensure the depth-wise traversal of the
 graph.
 
 - While processing a client request for BFS, the different levels of the graph will be processed 
@@ -157,7 +157,7 @@ traversals. Also, you need to ensure that in every case, each parent thread wait
 threads to terminate.
 
 - For DFS, the thread created by the relevant secondary server sends to the client a list of vertices
-such that each vertex in the list is the deepest/last vertex lying on a unique path of the graph.
+such that each vertex in the list is the ```deepest/last vertex lying on a unique path of the graph```.
 Thus, if a path in the graph is 1-2-5-3, then for this path 3 should be returned and this needs
 to be done for every other path in the graph. The secondary server thread sends this list to the
 client via the single message queue and exits. The client prints this vertex list on its console as
@@ -186,22 +186,22 @@ the servers.
   - Want to terminate the application? Press Y (Yes) or N (No)
     
 - If N is given as input, the process keeps running as usual and will not communicate with any
-other process. If Y is given as input, the process will inform the load balancer via the single
-message queue that the load balancer needs to terminate.
+other process. If Y is given as input, the process will inform the load balancer via the ```single
+message queue``` that the load balancer needs to terminate.
 
 - After passing on the termination information to the load balancer, the cleanup process will
 terminate.
 
 - When the load balancer receives the termination information from the cleanup process, the
-load balancer informs all the three servers to terminate via the single message queue, sleeps
-for 5 seconds, deletes the message queue and terminates. If you can think of any other cleanup
+load balancer informs all the three servers to terminate via the single message queue, ```sleeps
+for 5 seconds```, deletes the message queue and terminates. If you can think of any other cleanup
 activity required for the correct execution of the application, you can do that.
 
 - On receiving the termination information, the servers perform the relevant cleanup activities
 and terminate.
 
 - Note that the cleanup process will not force the load balancer to terminate while there are
-pending client requests. Moreover, the load balancer will not force the servers to terminate in
+pending client requests. Moreover, the ```load balancer will not force the servers to terminate``` in
 the midst of servicing any client request or while there are pending client requests.
 
 ## ```HANDLING CONCURRENT CLIENT REQUESTS```
@@ -209,8 +209,8 @@ the midst of servicing any client request or while there are pending client requ
 - Multiple read operations can be performed on the same
 graph file simultaneously. However, you need to be careful about simultaneous write operations as
 well as simultaneous read and write operations on the same graph file. Such conflicting operations
-have to be performed serially. You have to ensure this by using either semaphore or mutex. You need
-to use some locking mechanism on the graph files. You are free to use any synchronization construct
+have to be performed serially. You have to ensure this by using either ```semaphore or mutex```. You need
+to use some ```locking mechanism on the graph files```. You are free to use ```any synchronization construct```
 between semaphore or mutex.
 
 ## Authors
